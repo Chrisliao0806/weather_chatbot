@@ -151,9 +151,7 @@ class WeatherChatBot:
         """
         chain_to_json = self.json_prompt | self.llm
         params = chain_to_json.invoke({"history": chat_history, "question": question})
-        print(params)
         params = self._json_format(params.content)
-        print(params)
         params = json.loads(params)
         params["Authorization"] = os.getenv("WEB_KEY")
         weather_data = self.fetch_data(params)
@@ -162,7 +160,6 @@ class WeatherChatBot:
             TEMPLATE_FINAL.replace("{{weather_data}}", escaped_weather_data)
         )
 
-        # self.init_json_toolkit(weather_data["records"]["Locations"][0]["Location"][0])
         chain = self.final_prompt | self.llm
         answer = chain.invoke({"history": chat_history, "question": question})
         return answer
