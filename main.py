@@ -12,7 +12,7 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-template_json_format = """你是一個天氣機器人，請根據提供的陣列資料回答使用者問題，今天的日期是{{date}}，請依據今天的日期回覆使用者其他日期或是相對時間的資訊。
+TEMPLATE_FINAL = """你是一個天氣機器人，請根據提供的陣列資料回答使用者問題，今天的日期是{{date}}，請依據今天的日期回覆使用者其他日期或是相對時間的資訊。
         接下來，以下我們目前從中央氣象局收到的json資料:
         
         {{weather_data}}
@@ -26,7 +26,7 @@ template_json_format = """你是一個天氣機器人，請根據提供的陣列
         最後回覆請以中文回覆。
 """.replace("{{date}}", datetime.datetime.now().strftime("%Y-%m-%d"))
 
-template = """你是一個將客戶問題轉換成json格式的機器人。今天客戶的目標是要去詢問台北的天氣資訊，我們的目標是要將客戶的問題轉換成json格式的資料，然後再回答客戶的問題。
+TEMPLATE = """你是一個將客戶問題轉換成json格式的機器人。今天客戶的目標是要去詢問台北的天氣資訊，我們的目標是要將客戶的問題轉換成json格式的資料，然後再回答客戶的問題。
 
 一個json的格式如下:
 ```json
@@ -62,11 +62,11 @@ class WeatherChatBot:
             verbose (bool): 是否在 Agent 執行時顯示詳細資訊。
         """
         self.verbose = verbose
-        self.url = f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-063"
+        self.url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-063"
         self.llm = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))
         self.json_prompt = ChatPromptTemplate.from_messages(
             [
-                ("system", template),
+                ("system", TEMPLATE),
                 MessagesPlaceholder("history"),
                 ("human", "{question}"),
             ]
@@ -154,7 +154,7 @@ class WeatherChatBot:
         weather_data = self.fetch_data(params)
         escaped_weather_data = str(weather_data).replace("{", "{{").replace("}", "}}")
         self.prompt_template_add(
-            template_json_format.replace("{{weather_data}}", escaped_weather_data)
+            TEMPLATE_FINAL.replace("{{weather_data}}", escaped_weather_data)
         )
 
         # self.init_json_toolkit(weather_data["records"]["Locations"][0]["Location"][0])

@@ -10,7 +10,7 @@ load_dotenv()
 
 class WeatherCrawler:
     """
-    A class used to fetch and save weather data from the Taiwan Central Weather Bureau Open Data API.
+    A class used to fetch and save weather data from the Taiwan Central Weather Bureau Open Data API
 
     Attributes
     ----------
