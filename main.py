@@ -8,7 +8,8 @@ from langchain_community.agent_toolkits import JsonToolkit, create_json_agent
 from langchain_community.tools.json.tool import JsonSpec
 from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_openai import ChatOpenAI
+
+from utils.llm_usage import deepseek_r1, chatgpt4o
 
 load_dotenv()
 
@@ -53,7 +54,7 @@ class WeatherChatBot:
     互動式天氣預測機器人，利用先前儲存的 JSON 天氣資料與 LLM 來回覆使用者的天氣問題。
     """
 
-    def __init__(self, verbose=False):
+    def __init__(self, model_choose='chatgpt', verbose=False):
         """
         初始化機器人，建立 LLM 與 JSON Agent。
 
@@ -63,7 +64,10 @@ class WeatherChatBot:
         """
         self.verbose = verbose
         self.url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-D0047-063"
-        self.llm = ChatOpenAI(model="gpt-4o", api_key=os.getenv("OPENAI_API_KEY"))
+        if model_choose == 'chatgpt':
+            self.llm = chatgpt4o()
+        else:
+            self.llm = deepseek_r1(max_tokens=2048)
         self.json_prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", TEMPLATE),
@@ -147,6 +151,7 @@ class WeatherChatBot:
         """
         chain_to_json = self.json_prompt | self.llm
         params = chain_to_json.invoke({"history": chat_history, "question": question})
+        print(params)
         params = self._json_format(params.content)
         print(params)
         params = json.loads(params)
